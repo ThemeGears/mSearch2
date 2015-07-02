@@ -955,6 +955,9 @@ class mSearch2 {
 		if (!is_object($this->filtersHandler)) {
 			$this->loadHandler();
 		}
+		foreach ($request as &$v) {
+			$v = str_replace('"', '&quot;', $v);
+		}
 
 		if (method_exists($this->filtersHandler, 'getSuggestions')) {
 			return $this->filtersHandler->getSuggestions($ids, $request, $current);
@@ -973,7 +976,6 @@ class mSearch2 {
 					if (!empty($aliases[$key])) {
 						$alias = $aliases[$key];
 					}
-					//echo $key,"<br/>";
 
 					$values = $built[$key];
 					foreach ($values as $tmp) {

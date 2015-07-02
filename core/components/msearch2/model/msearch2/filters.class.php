@@ -56,7 +56,7 @@ class mse2FiltersHandler {
 					? explode('||', $row['value'])
 					: array($row['value']);
 				foreach ($tmp as $v) {
-					$v = trim($v);
+					$v = str_replace('"', '&quot;', trim($v));
 					if ($v == '') {continue;}
 					$name = strtolower($row['name']);
 					if (isset($filters[$name][$v])) {
@@ -95,7 +95,7 @@ class mse2FiltersHandler {
 			$this->modx->executedQueries++;
 			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
 				foreach ($row as $k => $v) {
-					$v = trim($v);
+					$v = str_replace('"', '&quot;', trim($v));
 					if ($v == '' || $k == 'id') {continue;}
 					else if (isset($filters[$k][$v])) {
 						$filters[$k][$v][] = $row['id'];
@@ -135,7 +135,7 @@ class mse2FiltersHandler {
 			$this->modx->executedQueries++;
 			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
 				foreach ($row as $k => $v) {
-					$v = trim($v);
+					$v = str_replace('"', '&quot;', trim($v));
 					if ($v == '' || $k == 'id') {continue;}
 					else if (isset($filters[$k][$v])) {
 						$filters[$k][$v][] = $row['id'];
@@ -172,7 +172,7 @@ class mse2FiltersHandler {
 			$this->modx->queryTime += microtime(true) - $tstart;
 			$this->modx->executedQueries++;
 			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
-				$value = trim($row['value']);
+				$value = str_replace('"', '&quot;', trim($row['value']));
 				if ($value == '') {continue;}
 				$key = $row['key'];
 				// Get ready for the special options in "key==value" format
@@ -226,7 +226,7 @@ class mse2FiltersHandler {
 			$this->modx->executedQueries++;
 			while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
 				foreach ($row as $k => $v) {
-					$v = trim($v);
+					$v = str_replace('"', '&quot;', trim($v));
 					if ($k == 'category_id') {
 						if ($row['parent'] == $v) {continue;}
 						else {$k = 'parent';}
@@ -824,6 +824,7 @@ class mse2FiltersHandler {
 
 		$tmp = array_flip($ids);
 		foreach ($requested as $value) {
+			$value = str_replace('"', '&quot;', $value);
 			if (isset($values[$value])) {
 				$resources = $values[$value];
 				foreach ($resources as $id) {

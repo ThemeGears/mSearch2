@@ -339,7 +339,11 @@ else {
 	$pdoFetch->addTime('Filters retrieved');
 	$request = array();
 	foreach ($_GET as $k => $v) {
-		$request[$k] = explode($mSearch2->config['values_delimeter'], $v);
+		$tmp = explode($mSearch2->config['values_delimeter'], $v);
+		$request[$k] = array();
+		foreach ($tmp as $v2) {
+			$request[$k][] = str_replace('"', '&quot;', $v2);
+		}
 	}
 
 	$aliases = $mSearch2->aliases;

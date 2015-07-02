@@ -368,7 +368,7 @@ var mSearch2 = {
 					if (arr.hasOwnProperty(value)) {
 						var count = arr[value];
 						var selector = filter.replace(mse2Config.filter_delimeter, "\\" + mse2Config.filter_delimeter);
-						var input = $('#' + mSearch2.options.prefix + selector, mSearch2.filters).find('[value="' + value + '"]');
+						var input = $('#' + mSearch2.options.prefix + selector, mSearch2.filters).find('[value="' + value.replace(/&quot;/g, '\\"') + '"]');
 						if (!input[0]) {continue;}
 
 						switch (input[0].tagName) {
