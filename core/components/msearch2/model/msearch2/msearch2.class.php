@@ -955,8 +955,8 @@ class mSearch2 {
 		if (!is_object($this->filtersHandler)) {
 			$this->loadHandler();
 		}
-		foreach ($request as &$v) {
-			$v = str_replace('"', '&quot;', $v);
+		foreach ($request as $k => $v) {
+			$request[$k] = str_replace('"', '&quot;', $v);
 		}
 
 		if (method_exists($this->filtersHandler, 'getSuggestions')) {
