@@ -253,7 +253,7 @@ if (!empty($ids)) {
 
 		// Trying to save weight of found ids if using mSearch2
 		$weight = false;
-		if (!empty($found) && strtolower($paginatorName) == 'msearch2') {
+		if (!empty($found) && strtolower($elementName) == 'msearch2') {
 			$tmp = array();
 			foreach ($ids as $v) {
 				$tmp[$v] = isset($found[$v])
@@ -415,7 +415,7 @@ else {
 		if (!isset($output['filters'][$filter])) {
 			$output['filters'][$filter] = '';
 		}
-		$output['filters'][$filter] .= $pdoFetch->getChunk($tpl, array(
+		$output['filters'][$filter] = $pdoFetch->getChunk($tpl, array(
 			'filter' => $method,
 			'table' => $table,
 			'rows' => $rows,
