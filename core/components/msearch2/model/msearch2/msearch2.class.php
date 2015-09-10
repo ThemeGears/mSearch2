@@ -519,6 +519,7 @@ class mSearch2 {
 		}
 
 		// Log the search query
+		$query = preg_replace('#[^\w\s-]#iu', '', $query);
 		/** @var mseQuery $object */
 		if ($object = $this->modx->getObject('mseQuery', array('query' => $query))) {
 			$object->set('quantity', $object->get('quantity') + 1);
@@ -530,8 +531,8 @@ class mSearch2 {
 		}
 		$object->set('found', count($result));
 		$object->save();
-
 		arsort($result);
+
 		return $result;
 	}
 
@@ -575,6 +576,9 @@ class mSearch2 {
 		$words = preg_split($pcre, $string, -1, PREG_SPLIT_NO_EMPTY);
 		$words = array_unique($words);
 		$forms = $this->getBaseForms($words, false);
+		if (!$words && !$forms) {
+			return '';
+		}
 		$q = $this->modx->newQuery('mseAlias', array('word:IN' => array_merge($words, array_keys($forms))));
 		$q->select('word,alias,replace');
 		$tstart = microtime(true);
@@ -597,8 +601,8 @@ class mSearch2 {
 				}
 			}
 		}
-
 		$words = array_unique($words);
+
 		return implode(' ', $words);
 	}
 
@@ -615,12 +619,16 @@ class mSearch2 {
 	 * @return mixed
 	 */
 	public function Highlight($text, $query, $htag_open = '<b>', $htag_close = '</b>', $strict = true) {
-		if (empty($query)) { return $text; }
+		if (empty($query)) {
+			return $text;
+		}
 		$from = $to = array();
 
 		$tmp_words = preg_split($this->config['split_words'], $query, -1, PREG_SPLIT_NO_EMPTY);
 		// Exact match
-		$pcre = $strict ? '/\b'.$query.'\b/imu' : '/'.$query.'/imu';
+		$pcre = $strict
+			? '#\b' . preg_quote($query) . '\b#imus'
+			: '#' . preg_quote($query) . '#imus';
 		if (count($tmp_words) > 1 && preg_match($pcre, $text, $matches)) {
 			$pos = mb_stripos($text, $matches[0], 0, 'UTF-8');
 			if ($pos >= $this->config['introCutBefore']) {
