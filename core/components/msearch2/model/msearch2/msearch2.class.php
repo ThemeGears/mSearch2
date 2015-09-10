@@ -521,7 +521,7 @@ class mSearch2 {
 						$weight = round($this->config['like_match_bonus']);
 						if (!isset($result[$v])) {
 							$result[$v] = $weight;
-							$this->log("+ {$weight} points to new resource that was found by LIKE search with single word \"{$word}\"");
+							$this->log("+ {$weight} points to new resource {$v} that was found by LIKE search with single word \"{$word}\"");
 							$added ++;
 						}
 						else {
@@ -1127,7 +1127,7 @@ class mSearch2 {
 	 * @param $entry
 	 */
 	public function log($entry) {
-		if ($this->pdoTools && empty($this->config['hideSearchLog'])) {
+		if ($this->pdoTools && !empty($this->config['showSearchLog'])) {
 			$this->pdoTools->addTime('[mSearch2] ' . $entry);
 		}
 	}

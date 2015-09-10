@@ -141,6 +141,10 @@ $tmp = array(
 		'type' => 'combo-boolean',
 		'value' => false,
 	),
+	'showSearchLog' => array(
+		'type' => 'combo-boolean',
+		'value' => false,
+	),
 );
 
 foreach ($tmp as $k => $v) {

@@ -72,3 +72,4 @@ $_lang['mse2_prop_pageId'] = 'Id of the page that will be sent to the search que
 
 $_lang['mse2_prop_fields'] = 'List of indexed fields of the resource to search for. Each field you can specify the search weight through colon.';
 $_lang['mse2_prop_onlyIndex'] = 'Search by index words, without the addition of bonuses for exact phrases in a simple search through LIKE.';
+$_lang['mse2_prop_showSearchLog'] = 'Show detailed search log when showLog is enabled.';
