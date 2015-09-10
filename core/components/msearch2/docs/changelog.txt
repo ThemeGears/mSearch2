@@ -2,6 +2,7 @@ Changelog for mSearch2.
 
 1.3.7 pl
 ==============
+- [#39] Improved search log in &showLog=`1`.
 - Fixed some warnings in system log.
 - [#38] Fixed placeholder "weight" of snippet mSearch2 when it used inside mFilter2.
 

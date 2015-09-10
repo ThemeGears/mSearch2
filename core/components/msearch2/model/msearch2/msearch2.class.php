@@ -412,7 +412,7 @@ class mSearch2 {
 		$string = $this->query = $this->addAliases($string);
 		$this->log('Search query with processed aliases: "'.mb_strtolower($string.'"', 'UTF-8'));
 		$words = $this->getBaseForms($string, false);
-		$result = $all_words = $found_words = array();
+		$result = $all_words = $found_words = $debug = array();
 
 		// Search by words index
 		if (!empty($words)) {
@@ -424,12 +424,23 @@ class mSearch2 {
 				$this->modx->queryTime += microtime(true) - $tstart;
 				$this->modx->executedQueries++;
 				while ($row = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
+					$weight = $this->fields[$row['field']] * $row['count'];
+					// Add to results
 					if (isset($result[$row['resource']])) {
-						$result[$row['resource']] += $this->fields[$row['field']] * $row['count'];
+						$result[$row['resource']] += $weight;
 					}
 					else {
-						$result[$row['resource']] = $this->fields[$row['field']] * $row['count'];
+						$result[$row['resource']] = $weight;
 					}
+
+					// Search by INDEX debug
+					$debug[$row['resource']][] = array(
+						'field' => $row['field'],
+						'word' => $row['word'],
+						'count' => $row['count'],
+						'weight' => $this->fields[$row['field']],
+						'total' => $weight,
+					);
 
 					if (isset($words[$row['word']])) {
 						$all_words[$row['resource']][$words[$row['word']]] = 1;
@@ -438,11 +449,17 @@ class mSearch2 {
 				}
 			}
 		}
-
 		$added = 0;
 
 		if (!empty($found_words)) {
-			$this->log('Found results by words INDEX ('.implode(',',array_keys($words)).'): '.count($result));
+			$message = 'Found results by words INDEX (' . implode(',', array_keys($found_words)) . '): ' . count($result);
+			ksort($debug);
+			foreach ($debug as $k => $v) {
+				foreach ($v as $v2) {
+					$message .= "\n\t+ {$v2['total']} points to resource {$k} for word \"{$v2['word']}\" in field \"{$v2['field']}\" ({$v2['count']} * {$v2['weight']})";
+				}
+			}
+			$this->log($message);
 		}
 		else {
 			$this->log('Nothing found by words INDEX');
@@ -452,7 +469,7 @@ class mSearch2 {
 		if (empty($this->config['onlyIndex'])) {
 			$bulk_words = $this->getBulkWords($query);
 			$tmp_words = preg_split($this->config['split_words'], $query, -1, PREG_SPLIT_NO_EMPTY);
-			if (count($bulk_words) > 1 || count($tmp_words) > 1 || empty($result)) {
+			if (count($bulk_words) > 1 || count($tmp_words) > 1 /*|| empty($result)*/) {
 				if (!empty($this->config['exact_match_bonus']) || !empty($this->config['all_words_bonus'])) {
 					$exact = $this->simpleSearch($query);
 					// Exact match bonus
@@ -460,11 +477,11 @@ class mSearch2 {
 						foreach ($exact as $v) {
 							if (isset($result[$v])) {
 								$result[$v] += $this->config['exact_match_bonus'];
-								//$this->log('Added "exact match bonus" for a resource '.$v.' for words "'.implode(', ', $words).'": +'.$this->config['exact_match_bonus']);
+								$this->log("+ {$this->config['exact_match_bonus']} points to resource {$v} for system setting \"exact_match_bonus\" with words \"{$query}\"");
 							}
 							else {
 								$result[$v] = $this->config['exact_match_bonus'];
-								//$this->log('Found resource '.$v.' by LIKE search with all words "'.implode(', ',$words).'": +'.$this->config['exact_match_bonus']);
+								$this->log("+ {$this->config['exact_match_bonus']} points to new resource {$v} that was found by LIKE search with exact matched words \"{$query}\"");
 								$added ++;
 							}
 						}
@@ -476,7 +493,7 @@ class mSearch2 {
 							foreach ($all_words as $k => $v) {
 								if (count($bulk_words) == count($v)) {
 									$result[$k] += $this->config['all_words_bonus'];
-									//$this->log('Added "all words bonus" for a resource '.$k.' for words "'.implode(', ', $words).'": +'.$this->config['all_words_bonus']);
+									$this->log("+ {$this->config['all_words_bonus']} points to resource {$k} for system setting \"all_words_bonus\" with words \"" . implode(', ', $bulk_words) . "\"");
 								}
 							}
 						}
@@ -490,7 +507,7 @@ class mSearch2 {
 					if (!isset($result[$v])) {
 						$weight = round($this->config['like_match_bonus']);
 						$result[$v] = $weight;
-						//$this->log('Found resource '.$v.' by LIKE search with all words "'.$query.'": +'.$weight);
+						$this->log("+ {$weight} points to resource {$v} by LIKE search with words \"{$query}\"");
 						$added ++;
 					}
 				}
@@ -504,18 +521,17 @@ class mSearch2 {
 						$weight = round($this->config['like_match_bonus']);
 						if (!isset($result[$v])) {
 							$result[$v] = $weight;
-							//$this->log('Found resource '.$v.' by LIKE search with single word "'.$word.'": +'.$weight);
+							$this->log("+ {$weight} points to new resource that was found by LIKE search with single word \"{$word}\"");
 							$added ++;
 						}
 						else {
 							$result[$v] += $weight;
-							//$this->log('Added "LIKE bonus" for a resource '.$v.' for word "'.$word.'": +'.$weight);
+							$this->log("+ {$weight} points to resource {$v} by LIKE search for word \"{$word}\"");
 						}
-
 					}
 				}
 			}
-			$this->log('Added resources by LIKE search: '.$added);
+			$this->log('Added resources by LIKE search: ' . $added);
 		}
 
 		// Log the search query
