@@ -176,6 +176,7 @@ class mseIndexCreateProcessor extends modProcessor {
 		if (!empty($words)) {
 			$rows = array();
 			foreach ($words as $word => $fields) {
+				$word = $this->modx->quote($word);
 				foreach ($fields as $field => $count) {
 					$rows[] = "({$resource_id}, '{$field}', '{$word}', '{$count}', '{$class_key}')";
 				}
@@ -187,6 +188,13 @@ class mseIndexCreateProcessor extends modProcessor {
 		$q = $this->modx->prepare($sql);
 		if (!$q->execute()) {
 			$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Could not save search index of resource '.$resource_id.': '.print_r($q->errorInfo(),1));
+		} else {
+			while ($q->nextRowset()) {
+			}
+			$error = $q->errorInfo();
+			if ($error[0] !== '00000') {
+				$this->modx->log(modX::LOG_LEVEL_ERROR, '[mSearch2] Could not save search index of resource '.$resource_id.': '.print_r($error,1));
+			}
 		}
 	}
 
